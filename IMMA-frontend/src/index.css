@@ -28,6 +28,8 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+    background-image: linear-gradient(to bottom, #fae4ce, #A6C6FD, #A6C6FD);
+    background-size: 100%;
 }
 
 h1 {
@@ -52,6 +54,26 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+input {
+    border-radius: 20px;
+    border: 1px solid white;
+    padding: 0.6em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    color: grey;
+    background-color: white;
+    box-shadow: 5px 5px 5px #888888;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 @media (prefers-color-scheme: light) {

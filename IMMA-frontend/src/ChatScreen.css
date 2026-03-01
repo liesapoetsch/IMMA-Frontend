@@ -14,7 +14,7 @@
     background: #ffffff;
     border-radius: 28px;
     padding: 10px 14px;
-    /*width: 360px;*/
+    width:75%;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.06);
     transition: box-shadow 0.2s;
 }
@@ -68,4 +68,75 @@
     padding: 0;
     font-family: inherit;
     vertical-align: middle;
+}
+
+.chatBubbleKI {
+    display: flex;
+    width: 15rem;
+    padding: 0.8rem;
+    justify-content: center;
+    align-items: center;
+    margin-right: auto;
+}
+
+.chatBubbleUser{
+    display: flex;
+    width: 15rem;
+    padding: 0.8rem;
+    justify-content: center;
+    align-items: center;
+    background: #ffffff;
+    border-radius: 28px;
+    margin-left: auto;
+}
+
+
+.chatContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    height:40rem;
+    overflow:auto;
+    scroll-behavior: smooth;
+}
+
+.chatRow {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-send {
+    border: none;
+    color: black;
+    background: white;
+    padding: 10px 10px;
+    border-radius: 28px;
+}
+
+.btn-send:hover {
+    color: white;
+    background: black;
+}
+
+.inputRow {
+    padding-top: 3rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+}
+
+.bubbleContainer {
+    display:flex ;
+    gap:1.5rem;
+    flex-direction:column;
+}
+
+.profilePicture {
+    width: 3rem;
+    height: 2.7rem;
+    border-radius: 50%;
+    object-fit: cover;
+
 }

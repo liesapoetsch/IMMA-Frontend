@@ -149,7 +149,13 @@
 }
 
 .fileChat {
-    width:20%;
+    width:80%;
     height:auto;
+    border-radius: 10px;
+}
+
+.botimage {
+    width: 80%;
+    height: 7rem;
     border-radius: 10px;
 }

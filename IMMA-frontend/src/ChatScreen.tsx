@@ -1,4 +1,4 @@
-import {useState, useRef, useEffect, type ChangeEvent} from "react";
+import {useState, useRef, useEffect,} from "react";
 import "./ChatScreen.css";
 import immaProfile from "./assets/ImmaProfilePicture.png"
 import FileInput from "./components/FileInput.tsx"
@@ -6,9 +6,9 @@ import FileInput from "./components/FileInput.tsx"
 interface chatHistory {
     id: number;
     message: string;
-    answer: string;
+    answer: string | undefined;
     img : string |undefined; // für Image Pfad maybe
-    imgAnswer : string | null;
+    imgAnswer : string | undefined;
     //date?
 }
 
@@ -17,8 +17,9 @@ export default function InputBar() {
     const [value, setValue] = useState<string>("");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [sendMessage, setSendMessage] = useState<boolean>(true);
-    const [chatHistory, setChatHistory] = useState<chatHistory[]>([{id:0,message:"Hello", answer:"Hello, Im Imma , how can i help youuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu ?",img: undefined, imgAnswer:null}]);
+    const [chatHistory, setChatHistory] = useState<chatHistory[]>([{id:0,message:"Hello", answer:"Hello, Im Imma , how can i help youuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu ?",img: undefined, imgAnswer:undefined}]);
     const [uploadedFile, setUploadedFile] = useState<string | undefined>(undefined);
+    //const [answer, setAnswer] = useState<string | undefined>(undefined);
 
     useEffect(() => {
         const ta = textareaRef.current;
@@ -35,21 +36,19 @@ export default function InputBar() {
         console.log(chatHistory);
     }, [chatHistory]);
 
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [url, setUrl] = useState<string | undefined>(undefined);
+
+    //const [url, setUrl] = useState<string | undefined>(undefined);
 
 
-
-    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-        // Access the first file selected by the user
-        if (event.target.files && event.target.files.length > 0) {
-            setSelectedFile(event.target.files[0]);
-        }
+    const urlToFile = async (url: string, fileName: string): Promise<File> => {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        return new File([blob], fileName, { type: blob.type });
     };
 
-    const handleUpload = async () => {
+    /*const handleUpload = async () => {
         if (!selectedFile) return alert("Please select a file first!");
-
+        const file = await urlToFile(uploadedFile, 'filename.jpg');
         // 1. Create FormData object
         const formData = new FormData();
 
@@ -69,31 +68,63 @@ export default function InputBar() {
         } catch (error) {
             console.error("Error uploading image:", error);
         }
-    }
+    }*/
 
-    function handleSendMessage() {
-        if(value !== "" || uploadedFile !== undefined){
-            setChatHistory(prev => [...prev, {
+    async function handleSendMessage() {
+
+
+        if (value !== "" || uploadedFile !== undefined) {
+            /*setChatHistory(prev => [...prev, {
                 id: prev.length,
                 message: value,
-                answer: "",
+                answer: answer,
                 img: uploadedFile ?? undefined,
-                imgAnswer: null
-            }]);
-            fetch('http://localhost:8000/api/text_output/', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({gemini_request: value, image: "imagepath"})
-            })
-                .then(res => res.json())
-                .then(data => setChatHistory(prev =>
-                    prev.map((chat, index) =>
-                        index === prev.length - 1
-                            ? {...chat, answer: data.gemini_request}
-                            : chat
-                    )
-                ))
-                .catch(err => console.error('Oops!', err));
+                imgAnswer: url
+            }]);*/
+
+            if (uploadedFile !== undefined) {
+                const file = await urlToFile(uploadedFile, 'filename.jpg');
+                const formData = new FormData();
+                formData.append('image', file);
+                formData.append('gemini_response', value);
+
+                try {
+                    const res = await fetch('http://localhost:8000/api/text_image_output/', {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    const data = await res.json();
+
+
+                    setChatHistory(prev => [...prev, {
+                        id: prev.length,
+                        message: value,
+                        answer: data.gemini_response,
+                        img: uploadedFile ?? undefined,
+                        imgAnswer: data.full_image_url
+                    }]);
+                    //setUrl(data.full_image_url);
+
+                } catch (error) {
+                    console.error("Error uploading image:", error);
+                }
+            } else {
+                fetch('http://localhost:8000/api/text_output/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ gemini_request: value, image: "imagepath" })
+                })
+                    .then(res => res.json())
+                    .then(data => setChatHistory(prev =>
+                        prev.map((chat, index) =>
+                            index === prev.length - 1
+                                ? { ...chat, answer: data.gemini_request }
+                                : chat
+                        )
+                    ))
+                    .catch(err => console.error('Oops!', err));
+            }
+
             setValue("");
             setUploadedFile(undefined);
             setSendMessage(prev => !prev);
@@ -115,7 +146,11 @@ export default function InputBar() {
                        {chat.answer === "" ? "" :
                            <div className={"chatBubbleKI"}>
                                <img src={immaProfile} alt="IMMA" className = "profilePicture" />
-                            {chat.answer}
+                               <div className={"column"}>
+                                   {chat.answer}
+                                   {chat.imgAnswer !== undefined && <img src={chat.imgAnswer} alt={"file"} className={"botimage"}/> }
+                               </div>
+
                            </div>
                        }
                 </div>

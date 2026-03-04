@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import "./ChatScreen.css";
 import immaProfile from "./assets/ImmaProfilePicture.png"
+import FileInput from "./components/FileInput.tsx"
 
 interface chatHistory {
     id: number;
     message: string;
     answer: string;
-    img : string | null; // für Image Pfad maybe
+    img : string |undefined; // für Image Pfad maybe
     imgAnswer : string | null;
     //date?
 }
@@ -16,7 +17,8 @@ export default function InputBar() {
     const [value, setValue] = useState<string>("");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [sendMessage, setSendMessage] = useState<boolean>(true);
-    const [chatHistory, setChatHistory] = useState<chatHistory[]>([{id:0,message:"Hello", answer:"Hello, Im Imma , how can i help you ?",img: null, imgAnswer:null}]);
+    const [chatHistory, setChatHistory] = useState<chatHistory[]>([{id:0,message:"Hello", answer:"Hello, Im Imma , how can i help youuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu ?",img: undefined, imgAnswer:null}]);
+    const [uploadedFile, setUploadedFile] = useState<string | undefined>(undefined);
 
     useEffect(() => {
         const ta = textareaRef.current;
@@ -32,16 +34,17 @@ export default function InputBar() {
     }, [chatHistory]);
 
     function handleSendMessage() {
-        if(value !== ""){
-            setSendMessage(!sendMessage);
+        if(value !== "" || uploadedFile !== undefined){
             setChatHistory(prev => [...prev, {
                 id: prev.length,
                 message: value,
                 answer: "",
-                img: null,
+                img: uploadedFile ?? undefined,
                 imgAnswer: null
             }]);
             setValue("");
+            setUploadedFile(undefined);
+            setSendMessage(prev => !prev);
         }
     }
 
@@ -52,6 +55,7 @@ export default function InputBar() {
                    <div className={"bubbleContainer"} key={chat.id}>
                    <div className="chatRow">
                    <div className={"chatBubbleUser"}>
+                       {chat.img !== undefined && <img src={chat.img} alt={"file"} className={"fileChat"}/> }
                        {chat.message}
                    </div>
                    </div>
@@ -67,12 +71,14 @@ export default function InputBar() {
 
                ))}
            </div>
+
+
             <div className = "inputRow">
+
             <div className="input-bar">
                 {/* Plus Button */}
-                <button className="btn btn-plus" aria-label="Hinzufügen">
-                    +
-                </button>
+
+                <FileInput onFileChange={setUploadedFile} uploaded={sendMessage}/>
 
                 {/* Textarea */}
                 <textarea

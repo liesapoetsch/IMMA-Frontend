@@ -17,7 +17,7 @@ export default function InputBar() {
     const [value, setValue] = useState<string>("");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [sendMessage, setSendMessage] = useState<boolean>(true);
-    const [chatHistory, setChatHistory] = useState<chatHistory[]>([{id:0,message:"Hello", answer:"Hello, Im Imma , how can i help youuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu ?",img: undefined, imgAnswer:undefined}]);
+    const [chatHistory, setChatHistory] = useState<chatHistory[]>([{id:0,message:"Hello", answer:"Hello, I'm IMMA. How can I help you?",img: undefined, imgAnswer:undefined}]);
     const [uploadedFile, setUploadedFile] = useState<string | undefined>(undefined);
     //const [answer, setAnswer] = useState<string | undefined>(undefined);
 

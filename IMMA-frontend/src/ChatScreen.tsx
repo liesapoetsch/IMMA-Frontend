@@ -1,13 +1,14 @@
 import {useState, useRef, useEffect, type ChangeEvent} from "react";
 import "./ChatScreen.css";
 import immaProfile from "./assets/ImmaProfilePicture.png"
+import FileInput from "./components/FileInput.tsx"
 
 interface chatHistory {
     id: number;
     message: string;
     answer: string;
-    img: string | null; // für Image Pfad maybe
-    imgAnswer: string | null;
+    img : string |undefined; // für Image Pfad maybe
+    imgAnswer : string | null;
     //date?
 }
 
@@ -16,13 +17,8 @@ export default function InputBar() {
     const [value, setValue] = useState<string>("");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [sendMessage, setSendMessage] = useState<boolean>(true);
-    const [chatHistory, setChatHistory] = useState<chatHistory[]>([{
-        id: 0,
-        message: "Hello",
-        answer: "Hello, Im Imma , how can i help you ?",
-        img: null,
-        imgAnswer: null
-    }]);
+    const [chatHistory, setChatHistory] = useState<chatHistory[]>([{id:0,message:"Hello", answer:"Hello, Im Imma , how can i help youuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu ?",img: undefined, imgAnswer:null}]);
+    const [uploadedFile, setUploadedFile] = useState<string | undefined>(undefined);
 
     useEffect(() => {
         const ta = textareaRef.current;
@@ -76,13 +72,12 @@ export default function InputBar() {
     }
 
     function handleSendMessage() {
-        if (value !== "") {
-            setSendMessage(!sendMessage);
+        if(value !== "" || uploadedFile !== undefined){
             setChatHistory(prev => [...prev, {
                 id: prev.length,
                 message: value,
                 answer: "",
-                img: null,
+                img: uploadedFile ?? undefined,
                 imgAnswer: null
             }]);
             fetch('http://localhost:8000/api/text_output/', {
@@ -100,87 +95,86 @@ export default function InputBar() {
                 ))
                 .catch(err => console.error('Oops!', err));
             setValue("");
+            setUploadedFile(undefined);
+            setSendMessage(prev => !prev);
         }
     }
 
     return (
         <div className="page">
-            <img src={url} alt={"Cooles bild"}/>
-            <div className="chatContainer" ref={containerRef}>
-                {chatHistory.map((chat: chatHistory) => (
-                    <div className={"bubbleContainer"} key={chat.id}>
-                        <div className="chatRow">
-                            <div className={"chatBubbleUser"}>
-                                {chat.message}
-                            </div>
-                        </div>
-                        <div className="chatRow">
-                            {chat.answer === "" ? "" :
-                                <div className={"chatBubbleKI"}>
-                                    <img src={immaProfile} alt="IMMA" className="profilePicture"/>
-                                    {chat.answer}
-                                </div>
-                            }
-                        </div>
-                    </div>
-
-                ))}
-            </div>
-            <div className="inputRow">
-                <div className="input-bar">
-                    {/* Plus Button */}
-                    <button className="btn btn-plus" aria-label="Hinzufügen">
-                        +
-                    </button>
-
-                    {/* Textarea */}
-                    <textarea
-                        ref={textareaRef}
-                        className="textarea"
-                        value={value}
-                        onChange={(e) => setValue(e.target.value)}
-                        placeholder="Submit your request here..."
-                        rows={1}
-                    />
-
-                    {/* Microphone Button */}
-                    <button className="btn btn-mic" aria-label="Spracheingabe">
-                        <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                d="M12 1a4 4 0 0 1 4 4v7a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-6 10a6 6 0 0 0 12 0h2a8 8 0 0 1-7 7.938V21h2v2H9v-2h2v-2.062A8 8 0 0 1 4 11H6z"/>
-                        </svg>
-                    </button>
-
+           <div className="chatContainer" ref={containerRef}>
+               {chatHistory.map((chat: chatHistory) => (
+                   <div className={"bubbleContainer"} key={chat.id}>
+                   <div className="chatRow">
+                   <div className={"chatBubbleUser"}>
+                       {chat.img !== undefined && <img src={chat.img} alt={"file"} className={"fileChat"}/> }
+                       {chat.message}
+                   </div>
+                   </div>
+                   <div className="chatRow">
+                       {chat.answer === "" ? "" :
+                           <div className={"chatBubbleKI"}>
+                               <img src={immaProfile} alt="IMMA" className = "profilePicture" />
+                            {chat.answer}
+                           </div>
+                       }
                 </div>
-                <button
-                    className="btn-send"
-                    onClick={() => handleSendMessage()}>
+                   </div>
+
+               ))}
+           </div>
+
+
+            <div className = "inputRow">
+
+            <div className="input-bar">
+                {/* Plus Button */}
+
+                <FileInput onFileChange={setUploadedFile} uploaded={sendMessage}/>
+
+                {/* Textarea */}
+                <textarea
+                    ref={textareaRef}
+                    className="textarea"
+                    value={value}
+                    onChange={(e) => setValue(e.target.value)}
+                    placeholder="Submit your request here..."
+                    rows={1}
+                />
+
+                {/* Microphone Button */}
+                <button className="btn btn-mic" aria-label="Spracheingabe">
                     <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="22"
-                        height="22"
+                        width="20"
+                        height="20"
                         viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        fill="currentColor"
+                        xmlns="http://www.w3.org/2000/svg"
                     >
-                        <path d="M10 14l11 -11"/>
-                        <path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5"/>
+                        <path d="M12 1a4 4 0 0 1 4 4v7a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-6 10a6 6 0 0 0 12 0h2a8 8 0 0 1-7 7.938V21h2v2H9v-2h2v-2.062A8 8 0 0 1 4 11H6z" />
                     </svg>
                 </button>
-                <div>
-                    <input type="file" onChange={handleFileChange} accept="image/*"/>
-                    <button onClick={handleUpload}>Upload to Server</button>
-                </div>
+
             </div>
+            <button
+                className="btn-send"
+                onClick={() => handleSendMessage()}>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <path d="M10 14l11 -11" />
+                    <path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5" />
+                </svg>
+            </button>
+        </div>
         </div>
     );
 }

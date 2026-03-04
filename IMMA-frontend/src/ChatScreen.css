@@ -75,21 +75,26 @@
     width: 15rem;
     padding: 0.8rem;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     margin-right: auto;
+    word-break: break-word;
     color: black;
+    gap: 0.75rem;
 }
 
 .chatBubbleUser{
     display: flex;
+    flex-direction: row;
+    gap: 1rem;
     width: 15rem;
     padding: 0.8rem;
     justify-content: center;
-    align-items: center;
-    color: black;
+    align-items: start;
     background: #ffffff;
     border-radius: 28px;
     margin-left: auto;
+    color: black;
+    word-break: break-word;
 }
 
 
@@ -111,7 +116,8 @@
     border: none;
     color: black;
     background: white;
-    padding: 10px 10px;
+    width:15%;
+    padding: 14px 14px;
     border-radius: 28px;
 }
 
@@ -121,12 +127,11 @@
 }
 
 .inputRow {
-    padding-top: 3rem;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-
+    padding-top:3rem;
 }
 
 .bubbleContainer {
@@ -141,4 +146,10 @@
     border-radius: 50%;
     object-fit: cover;
 
+}
+
+.fileChat {
+    width:20%;
+    height:auto;
+    border-radius: 10px;
 }

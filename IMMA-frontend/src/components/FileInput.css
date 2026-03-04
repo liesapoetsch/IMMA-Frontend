@@ -1,0 +1,50 @@
+
+    .plus-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        padding: 0;
+        aspect-ratio: 1 / 1;
+    }
+
+
+
+
+.plus-btn:hover {
+    background: #e0e0e0;
+}
+
+.preview-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.preview-wrapper img {
+    max-width: 50px;
+    max-height: 50px;
+}
+
+.preview-img {
+    max-width: 50px;
+    max-height: 50px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.remove-btn {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: none;
+    background: #ff4d4d;
+    color: white;
+    font-size: 9px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}

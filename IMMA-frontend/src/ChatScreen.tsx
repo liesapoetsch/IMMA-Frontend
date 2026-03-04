@@ -1,4 +1,4 @@
-import {useState, useRef, useEffect} from "react";
+import {useState, useRef, useEffect, type ChangeEvent} from "react";
 import "./ChatScreen.css";
 import immaProfile from "./assets/ImmaProfilePicture.png"
 
@@ -39,6 +39,42 @@ export default function InputBar() {
         console.log(chatHistory);
     }, [chatHistory]);
 
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [url, setUrl] = useState<string | undefined>(undefined);
+
+
+
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        // Access the first file selected by the user
+        if (event.target.files && event.target.files.length > 0) {
+            setSelectedFile(event.target.files[0]);
+        }
+    };
+
+    const handleUpload = async () => {
+        if (!selectedFile) return alert("Please select a file first!");
+
+        // 1. Create FormData object
+        const formData = new FormData();
+
+        // 2. Append the file (the key 'image' must match what your backend expects)
+        formData.append('image', selectedFile);
+        formData.append('gemini_response', "Beschreibe das Bild und trenne dann deine antwort mit einem %% und erstelle danach einen Prompt für GPT der auf dem Bild die Löcher markiert.");
+
+        try {
+            // 3. Send via fetch
+            await fetch('http://localhost:8000/api/text_image_output/', {
+                method: 'POST',
+                body: formData, // Fetch automatically sets the Content-Type to multipart/form-data
+            }).then(res => res.json()).then(data => {
+                console.log(data);
+                setUrl(data.full_image_url);
+            });
+        } catch (error) {
+            console.error("Error uploading image:", error);
+        }
+    }
+
     function handleSendMessage() {
         if (value !== "") {
             setSendMessage(!sendMessage);
@@ -58,7 +94,7 @@ export default function InputBar() {
                 .then(data => setChatHistory(prev =>
                     prev.map((chat, index) =>
                         index === prev.length - 1
-                            ? { ...chat, answer: data.gemini_request }
+                            ? {...chat, answer: data.gemini_request}
                             : chat
                     )
                 ))
@@ -69,6 +105,7 @@ export default function InputBar() {
 
     return (
         <div className="page">
+            <img src={url} alt={"Cooles bild"}/>
             <div className="chatContainer" ref={containerRef}>
                 {chatHistory.map((chat: chatHistory) => (
                     <div className={"bubbleContainer"} key={chat.id}>
@@ -139,6 +176,10 @@ export default function InputBar() {
                         <path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5"/>
                     </svg>
                 </button>
+                <div>
+                    <input type="file" onChange={handleFileChange} accept="image/*"/>
+                    <button onClick={handleUpload}>Upload to Server</button>
+                </div>
             </div>
         </div>
     );

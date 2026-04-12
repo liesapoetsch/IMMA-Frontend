@@ -109,20 +109,29 @@ export default function InputBar() {
                     console.error("Error uploading image:", error);
                 }
             } else {
-                fetch('http://localhost:8000/api/text_output/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ gemini_request: value, image: "imagepath" })
-                })
-                    .then(res => res.json())
-                    .then(data => setChatHistory(prev =>
-                        prev.map((chat, index) =>
-                            index === prev.length - 1
-                                ? { ...chat, answer: data.gemini_request }
-                                : chat
-                        )
-                    ))
-                    .catch(err => console.error('Oops!', err));
+                const formData = new FormData();
+                formData.append('gemini_response', value);
+
+                try {
+                    const res = await fetch('http://localhost:8000/api/text_output/', {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    const data = await res.json();
+
+
+                    setChatHistory(prev => [...prev, {
+                        id: prev.length,
+                        message: value,
+                        answer: data.gemini_response,
+                        img: uploadedFile ?? undefined,
+                        imgAnswer: data.full_image_url ?? undefined,
+                    }]);
+                    //setUrl(data.full_image_url);
+
+                } catch (error) {
+                    console.error("Error asking gemini:  ", error);
+                }
             }
 
             setValue("");

@@ -1,0 +1,208 @@
+.chat-feedback-block {
+    width: 100%;
+    margin-top: 0.65rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Inline thumbs row */
+.chat-feedback {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.chat-feedback__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+}
+
+.chat-feedback__btn:hover:not(:disabled) {
+    background: rgba(0, 0, 0, 0.06);
+    color: #222;
+}
+
+.chat-feedback__btn.is-active {
+    color: #2e7d32;
+}
+
+.chat-feedback__btn--down.is-active,
+.chat-feedback__btn--down:hover:not(:disabled) {
+    color: #c62828;
+}
+
+.chat-feedback__btn:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+.chat-feedback__hint {
+    margin: 0.5rem 0 0;
+    font-size: 0.75rem;
+    color: #888;
+    line-height: 1.35;
+}
+
+.chat-feedback--thanks {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: #2e7d32;
+}
+
+.chat-feedback--error {
+    font-size: 0.8rem;
+    color: #c62828;
+    line-height: 1.35;
+}
+
+.chat-feedback-error-block {
+    margin-top: 0.5rem;
+}
+
+.chat-feedback__retry {
+    margin-top: 0.35rem;
+    padding: 0;
+    border: none;
+    background: none;
+    font-size: 0.8rem;
+    color: #1565c0;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* Inline additional-feedback card (Langfuse-style) */
+.feedback-panel {
+    margin-top: 0.75rem;
+    padding: 1rem 1.1rem;
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.feedback-panel__icons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.85rem;
+}
+
+.feedback-panel__brand {
+    font-size: 1rem;
+    color: #999;
+    margin-right: 0.15rem;
+}
+
+.feedback-panel__icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #666;
+    cursor: pointer;
+}
+
+.feedback-panel__icon-btn.is-active {
+    color: #2e7d32;
+}
+
+.feedback-panel__icon-btn--down.is-active {
+    color: #c62828;
+}
+
+.feedback-panel__title {
+    margin: 0 0 0.3rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111;
+}
+
+.feedback-panel__hint {
+    margin: 0 0 0.65rem;
+    font-size: 0.875rem;
+    color: #555;
+}
+
+.feedback-panel__textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.7rem 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    resize: vertical;
+    min-height: 96px;
+}
+
+.feedback-panel__textarea:focus {
+    outline: none;
+    border-color: #999;
+}
+
+.feedback-panel__textarea:disabled {
+    opacity: 0.7;
+    background: #fafafa;
+}
+
+.feedback-panel__actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.85rem;
+}
+
+.feedback-panel__skip {
+    padding: 0.45rem 0.65rem;
+    border: none;
+    background: transparent;
+    font-size: 0.9rem;
+    color: #444;
+    cursor: pointer;
+}
+
+.feedback-panel__skip:hover:not(:disabled) {
+    color: #111;
+}
+
+.feedback-panel__skip:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.feedback-panel__submit {
+    padding: 0.5rem 1.15rem;
+    border: none;
+    border-radius: 8px;
+    background: #111;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.feedback-panel__submit:hover:not(:disabled) {
+    background: #333;
+}
+
+.feedback-panel__submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

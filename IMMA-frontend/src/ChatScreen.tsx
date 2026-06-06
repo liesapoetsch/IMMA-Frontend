@@ -1,25 +1,28 @@
-import {useState, useRef, useEffect,} from "react";
+import { useState, useRef, useEffect } from "react";
 import "./ChatScreen.css";
-import immaProfile from "./assets/ImmaProfilePicture.png"
-import FileInput from "./components/FileInput.tsx"
-
-interface chatHistory {
-    id: number;
-    message: string;
-    answer: string | undefined;
-    img : string |undefined; // für Image Pfad maybe
-    imgAnswer : string | undefined;
-    //date?
-}
+import immaProfile from "./assets/ImmaProfilePicture.png";
+import FileInput from "./components/FileInput.tsx";
+import FeedbackButtons from "./components/FeedbackButtons.tsx";
+import { useChatSession } from "./hooks/useChatSession.ts";
 
 export default function InputBar() {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [value, setValue] = useState<string>("");
+    const [value, setValue] = useState("");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const [sendMessage, setSendMessage] = useState<boolean>(true);
-    const [chatHistory, setChatHistory] = useState<chatHistory[]>([{id:0,message:"Hello", answer:"Hello, I'm IMMA. How can I help you?",img: undefined, imgAnswer:undefined}]);
-    const [uploadedFile, setUploadedFile] = useState<string | undefined>(undefined);
-    //const [answer, setAnswer] = useState<string | undefined>(undefined);
+    const [sendMessageToggle, setSendMessageToggle] = useState(true);
+    const [uploadedPreview, setUploadedPreview] = useState<string | undefined>();
+    const [selectedFile, setSelectedFile] = useState<File | undefined>();
+
+    const {
+        sessionId,
+        phase,
+        turns,
+        initializing,
+        sending,
+        initError,
+        sendMessage,
+        markFeedbackSubmitted,
+    } = useChatSession();
 
     useEffect(() => {
         const ta = textareaRef.current;
@@ -30,195 +33,170 @@ export default function InputBar() {
 
     useEffect(() => {
         if (containerRef.current) {
-
             containerRef.current.scrollTop = containerRef.current.scrollHeight;
         }
-        console.log(chatHistory);
-    }, [chatHistory]);
+    }, [turns, sending]);
 
-
-    //const [url, setUrl] = useState<string | undefined>(undefined);
-
-
-    const urlToFile = async (url: string, fileName: string): Promise<File> => {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        return new File([blob], fileName, { type: blob.type });
-    };
-
-    /*const handleUpload = async () => {
-        if (!selectedFile) return alert("Please select a file first!");
-        const file = await urlToFile(uploadedFile, 'filename.jpg');
-        // 1. Create FormData object
-        const formData = new FormData();
-
-        // 2. Append the file (the key 'image' must match what your backend expects)
-        formData.append('image', selectedFile);
-        formData.append('gemini_response', "Beschreibe das Bild und trenne dann deine antwort mit einem %% und erstelle danach einen Prompt für GPT der auf dem Bild die Löcher markiert.");
-
-        try {
-            // 3. Send via fetch
-            await fetch('http://localhost:8000/api/text_image_output/', {
-                method: 'POST',
-                body: formData, // Fetch automatically sets the Content-Type to multipart/form-data
-            }).then(res => res.json()).then(data => {
-                console.log(data);
-                setUrl(data.full_image_url);
-            });
-        } catch (error) {
-            console.error("Error uploading image:", error);
-        }
-    }*/
+    function handleFileChange(file: File | undefined, previewUrl?: string) {
+        setSelectedFile(file);
+        setUploadedPreview(previewUrl);
+    }
 
     async function handleSendMessage() {
+        if (!sessionId || sending) return;
+        if (value === "" && selectedFile === undefined) return;
 
+        const userMessage = value;
+        const preview = uploadedPreview;
+        const file = selectedFile;
 
-        if (value !== "" || uploadedFile !== undefined) {
-            /*setChatHistory(prev => [...prev, {
-                id: prev.length,
-                message: value,
-                answer: answer,
-                img: uploadedFile ?? undefined,
-                imgAnswer: url
-            }]);*/
+        setValue("");
+        setUploadedPreview(undefined);
+        setSelectedFile(undefined);
+        setSendMessageToggle((prev) => !prev);
 
-            if (uploadedFile !== undefined) {
-                const file = await urlToFile(uploadedFile, 'filename.jpg');
-                const formData = new FormData();
-                formData.append('image', file);
-                formData.append('gemini_response', value);
-
-                try {
-                    const res = await fetch('http://localhost:8000/api/text_image_output/', {
-                        method: 'POST',
-                        body: formData,
-                    });
-                    const data = await res.json();
-
-
-                    setChatHistory(prev => [...prev, {
-                        id: prev.length,
-                        message: value,
-                        answer: data.gemini_response,
-                        img: uploadedFile ?? undefined,
-                        imgAnswer: data.full_image_url
-                    }]);
-                    //setUrl(data.full_image_url);
-
-                } catch (error) {
-                    console.error("Error uploading image:", error);
-                }
-            } else {
-                const formData = new FormData();
-                formData.append('gemini_response', value);
-
-                try {
-                    const res = await fetch('http://localhost:8000/api/text_output/', {
-                        method: 'POST',
-                        body: formData,
-                    });
-                    const data = await res.json();
-
-
-                    setChatHistory(prev => [...prev, {
-                        id: prev.length,
-                        message: value,
-                        answer: data.gemini_response,
-                        img: uploadedFile ?? undefined,
-                        imgAnswer: data.full_image_url ?? undefined,
-                    }]);
-                    //setUrl(data.full_image_url);
-
-                } catch (error) {
-                    console.error("Error asking gemini:  ", error);
-                }
-            }
-
-            setValue("");
-            setUploadedFile(undefined);
-            setSendMessage(prev => !prev);
-        }
+        await sendMessage({
+            message: userMessage,
+            image: file,
+            userImagePreview: preview,
+        });
     }
+
+    const lastTurnId = turns.at(-1)?.id;
 
     return (
         <div className="page">
-           <div className="chatContainer" ref={containerRef}>
-               {chatHistory.map((chat: chatHistory) => (
-                   <div className={"bubbleContainer"} key={chat.id}>
-                   <div className="chatRow">
-                   <div className={"chatBubbleUser"}>
-                       {chat.img !== undefined && <img src={chat.img} alt={"file"} className={"fileChat"}/> }
-                       {chat.message}
-                   </div>
-                   </div>
-                   <div className="chatRow">
-                       {chat.answer === "" ? "" :
-                           <div className={"chatBubbleKI"}>
-                               <img src={immaProfile} alt="IMMA" className = "profilePicture" />
-                               <div className={"column"}>
-                                   {chat.answer}
-                                   {chat.imgAnswer !== undefined && <img src={chat.imgAnswer} alt={"file"} className={"botimage"}/> }
-                               </div>
+            {phase && import.meta.env.DEV && (
+                <p className="chat-phase-hint" aria-hidden>
+                    Phase: {phase}
+                </p>
+            )}
 
-                           </div>
-                       }
+            <div className="chatContainer" ref={containerRef}>
+                {initError && (
+                    <p className="chat-error-banner" role="alert">
+                        {initError}
+                    </p>
+                )}
+
+                {turns.map((turn) => (
+                    <div className="bubbleContainer" key={turn.id}>
+                        {turn.userMessage !== "" || turn.userImagePreview !== undefined ? (
+                            <div className="chatRow">
+                                <div className="chatBubbleUser">
+                                    {turn.userImagePreview !== undefined && (
+                                        <img
+                                            src={turn.userImagePreview}
+                                            alt="Uploaded"
+                                            className="fileChat"
+                                        />
+                                    )}
+                                    {turn.userMessage}
+                                </div>
+                            </div>
+                        ) : null}
+
+                        <div className="chatRow">
+                            {turn.errorMessage ? (
+                                <div className="chatBubbleKI chatBubbleKI--error">
+                                    <img src={immaProfile} alt="IMMA" className="profilePicture" />
+                                    <div className="column">
+                                        <p>{turn.errorMessage}</p>
+                                        {import.meta.env.DEV && turn.errorDetail && (
+                                            <p className="chat-error-detail">{turn.errorDetail}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            ) : turn.assistantMessage === undefined ? (
+                                sending && turn.id === lastTurnId ? (
+                                    <div className="chatBubbleKI">
+                                        <img src={immaProfile} alt="IMMA" className="profilePicture" />
+                                        <div className="column">...</div>
+                                    </div>
+                                ) : null
+                            ) : turn.assistantMessage === "" ? null : (
+                                <div className="assistantBlock">
+                                    <div className="chatBubbleKI">
+                                        <img src={immaProfile} alt="IMMA" className="profilePicture" />
+                                        <div className="column">
+                                            {turn.assistantMessage}
+                                            {turn.assistantImageUrl !== undefined && (
+                                                <img
+                                                    src={turn.assistantImageUrl}
+                                                    alt="Marked assembly"
+                                                    className="botimage"
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                    {!turn.feedbackSubmitted && (
+                                        <FeedbackButtons
+                                            messageId={turn.langfuseTraceId ?? ""}
+                                            onSubmitted={() => markFeedbackSubmitted(turn.id)}
+                                        />
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="inputRow">
+                <div className="input-bar">
+                    <FileInput onFileChange={handleFileChange} uploaded={sendMessageToggle} />
+
+                    <textarea
+                        ref={textareaRef}
+                        className="textarea"
+                        value={value}
+                        onChange={(e) => setValue(e.target.value)}
+                        placeholder="Submit your request here..."
+                        rows={1}
+                        disabled={!sessionId || sending || initializing}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                void handleSendMessage();
+                            }
+                        }}
+                    />
+
+                    <button className="btn btn-mic" type="button" aria-label="Spracheingabe">
+                        <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path d="M12 1a4 4 0 0 1 4 4v7a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-6 10a6 6 0 0 0 12 0h2a8 8 0 0 1-7 7.938V21h2v2H9v-2h2v-2.062A8 8 0 0 1 4 11H6z" />
+                        </svg>
+                    </button>
                 </div>
-                   </div>
 
-               ))}
-           </div>
-
-
-            <div className = "inputRow">
-
-            <div className="input-bar">
-                {/* Plus Button */}
-
-                <FileInput onFileChange={setUploadedFile} uploaded={sendMessage}/>
-
-                {/* Textarea */}
-                <textarea
-                    ref={textareaRef}
-                    className="textarea"
-                    value={value}
-                    onChange={(e) => setValue(e.target.value)}
-                    placeholder="Submit your request here..."
-                    rows={1}
-                />
-
-                {/* Microphone Button */}
-                <button className="btn btn-mic" aria-label="Spracheingabe">
+                <button
+                    className="btn-send"
+                    type="button"
+                    onClick={() => void handleSendMessage()}
+                    disabled={!sessionId || sending || initializing}
+                >
                     <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
                         xmlns="http://www.w3.org/2000/svg"
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                     >
-                        <path d="M12 1a4 4 0 0 1 4 4v7a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-6 10a6 6 0 0 0 12 0h2a8 8 0 0 1-7 7.938V21h2v2H9v-2h2v-2.062A8 8 0 0 1 4 11H6z" />
+                        <path d="M10 14l11 -11" />
+                        <path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5" />
                     </svg>
                 </button>
-
             </div>
-            <button
-                className="btn-send"
-                onClick={() => handleSendMessage()}>
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="22"
-                    height="22"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <path d="M10 14l11 -11" />
-                    <path d="M21 3l-6.5 18a.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5" />
-                </svg>
-            </button>
-        </div>
         </div>
     );
 }

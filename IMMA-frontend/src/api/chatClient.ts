@@ -82,19 +82,34 @@ function errorFromResponse(status: number, body: unknown, res: Response): ChatAp
     return new ChatApiError(status, `Request failed (${status})`);
 }
 
+/**
+ * Backend expects `message` as a plain string, e.g. `{ "message": "Hallo" }`.
+ * If a structured value slips through, read `text` or `content`.
+ */
+function toPlainMessageString(raw: unknown): string {
+    if (typeof raw === "string") return raw;
+    if (raw && typeof raw === "object") {
+        const obj = raw as Record<string, unknown>;
+        if (typeof obj.text === "string") return obj.text;
+        if (typeof obj.content === "string") return obj.content;
+    }
+    return "";
+}
+
 async function postChat(url: string, input?: SendMessageInput): Promise<ChatSession> {
     const hasImage = Boolean(input?.image);
+    const message = toPlainMessageString(input?.message);
     let body: BodyInit;
     const headers: Record<string, string> = { ...chatHeaders() };
 
     if (hasImage) {
         const fd = new FormData();
-        if (input?.message) fd.append("message", input.message);
+        fd.append("message", message);
         if (input?.image) fd.append("image", input.image, input.image.name);
         body = fd;
-    } else if (input?.message) {
+    } else if (message.length > 0) {
         headers["Content-Type"] = "application/json";
-        body = JSON.stringify({ message: input.message });
+        body = JSON.stringify({ message });
     } else {
         body = JSON.stringify({});
         headers["Content-Type"] = "application/json";

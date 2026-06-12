@@ -18,6 +18,7 @@ export interface ChatSession {
     updated_at: string;
 }
 
+/** User text — always sent to the API as a plain JSON string field `message`. */
 export interface SendMessageInput {
     message?: string;
     image?: File;
